@@ -23,9 +23,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("Request iniciada")
 	defer fmt.Println("Request finalizada")
-	//ctx := r.Context()
-	cambio.Cotar()
-
+	cambio.Cotar(w, r)
 }
 
 // func SalvaCotacao(cotacao *Cotacao) {

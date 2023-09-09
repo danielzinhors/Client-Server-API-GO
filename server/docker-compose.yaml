@@ -1,0 +1,9 @@
+version: '3'
+services:
+  sqlite-container:
+    image: alpine:latest  # Utilizaremos una imagen Alpine Linux como base
+    volumes:
+      - ./sqlite-data:/data  # Montar un volumen para almacenar la base de datos SQLite
+    command: sh -c "apk add --no-cache sqlite && sqlite3 /data/mydatabase.sqlite"  # Instalar SQLite y crear la base de datos
+    ports:
+      - "54321:54321"

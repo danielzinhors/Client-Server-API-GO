@@ -1,33 +1,40 @@
 package cambio
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
-	"os"
+	"time"
 
 	"github.com/danielzinhors/Client-Server-API-GO/server/banco"
 	"github.com/danielzinhors/Client-Server-API-GO/server/model"
 )
 
-func Cotar(w http.ResponseWriter, r *http.Request) {
+func Cotar(ctx context.Context) (*model.Cotacao, error) {
 	moeda := "USD-BRL"
-	req, err := http.Get("https://economia.awesomeapi.com.br/json/last/" + moeda)
+	ctx, cancel := context.WithTimeout(ctx, time.Millisecond*200)
+	defer cancel()
+	request, err := http.NewRequestWithContext(ctx, "GET", "https://economia.awesomeapi.com.br/json/last/"+moeda, nil)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error %v", err)
+		return nil, err
 	}
-	defer req.Body.Close()
-	res, err := io.ReadAll(req.Body)
+	response, err := http.DefaultClient.Do(request)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error %v", err)
+		return nil, err
 	}
+	defer response.Body.Close()
+
+	responseJson, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
 	var cotacao model.Cotacao
-	err = json.Unmarshal(res, &cotacao)
+	err = json.Unmarshal(responseJson, &cotacao)
 	if err != nil {
 		panic(err)
 	}
-	banco.SalvaCotacao(&cotacao)
-	json.NewEncoder(w).Encode(&cotacao.Usdbrl.Bid)
-	fmt.Println(cotacao.Usdbrl.Bid)
+	banco.SalvaCotacao(ctx, &cotacao)
+	return &cotacao, nil
 }

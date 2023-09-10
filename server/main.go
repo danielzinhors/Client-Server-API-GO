@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/danielzinhors/Client-Server-API-GO/server/cambio"
 )
@@ -20,5 +23,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("Request iniciada")
 	defer fmt.Println("Request finalizada")
-	cambio.Cotar(w, r)
+	ctx := context.Background()
+	cotacao, err := cambio.Cotar(ctx)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error %v", err)
+	}
+	json.NewEncoder(w).Encode(&cotacao.Usdbrl.Bid)
+	fmt.Println(cotacao.Usdbrl.Bid)
 }

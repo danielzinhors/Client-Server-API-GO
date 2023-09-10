@@ -8,12 +8,18 @@ import (
 	"os"
 
 	"github.com/danielzinhors/Client-Server-API-GO/server/cambio"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	http.HandleFunc("/cotacao", handler)
-	fmt.Println("Ouvindo na porta 8080")
-	http.ListenAndServe(":8080", nil)
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Printf("Some error occured. Err: %s", err)
+	}
+	port := os.Getenv("PORT")
+	fmt.Println("Ouvindo na porta " + port)
+	http.ListenAndServe(":"+port, nil)
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {

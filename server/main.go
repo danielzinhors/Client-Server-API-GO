@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -15,10 +16,10 @@ func main() {
 	http.HandleFunc("/cotacao", handler)
 	err := godotenv.Load()
 	if err != nil {
-		fmt.Printf("Some error occured. Err: %s", err)
+		log.Printf("Some error occured. Err: %s", err)
 	}
 	port := os.Getenv("PORT")
-	fmt.Println("Ouvindo na porta " + port)
+	log.Println("Ouvindo na porta " + port)
 	http.ListenAndServe(":"+port, nil)
 }
 
@@ -28,12 +29,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println("Request iniciada")
-	defer fmt.Println("Request finalizada")
+	defer log.Println("Request finalizada")
 	ctx := context.Background()
 	cotacao, err := cambio.Cotar(ctx)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error %v", err)
+		log.Printf("Error %v", err)
 	}
 	json.NewEncoder(w).Encode(&cotacao.Usdbrl.Bid)
-	fmt.Println(cotacao.Usdbrl.Bid)
 }
